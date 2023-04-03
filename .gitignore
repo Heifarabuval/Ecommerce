@@ -11,3 +11,4 @@ app/var/
 app/vendor/
 .mysql-data/
 app/composer.lock
+app/symfony.lock
