@@ -10,3 +10,4 @@ app/public/bundles/
 app/var/
 app/vendor/
 .mysql-data/
+app/composer.lock
