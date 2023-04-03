@@ -1,6 +1,6 @@
 .idea
 T-WEB-600_ecommerce.pdf
-./**/.env
+.env
 
 app/.env.local
 app/.env.local.php
