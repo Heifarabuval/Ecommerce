@@ -3,13 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\Validate\UserRegisterForm;
+use App\Utils\Json;
+use App\Utils\Validate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AuthenticationController extends AbstractController
@@ -20,6 +21,11 @@ class AuthenticationController extends AbstractController
     {
         $requestData = json_decode($request->getContent(), true);
 
+        $errors = Json::getJsonBody($request);
+
+        if  ($errors !== null)
+            return $this->json($errors,400);
+
         $userRegisterForm = new User();
         $userRegisterForm->setEmail($requestData['email'] ?? null);
         $userRegisterForm->setLogin($requestData['login'] ?? null);
@@ -27,20 +33,12 @@ class AuthenticationController extends AbstractController
         $userRegisterForm->setFirstname($requestData['firstname'] ?? null);
         $userRegisterForm->setPassword(strlen($requestData['password']) > 0 ? $passwordHasher->hashPassword($userRegisterForm, $requestData['password']) : "");
 
+        $errors = Validate::validateEntity($userRegisterForm, $validator);
 
-        $errors = $validator->validate($userRegisterForm);
+        if ($errors !== null)
+            return $this->json($errors,400);
 
-        if (count($errors) > 0) {
-            $validationErrors = [];
 
-            foreach ($errors as $error) {
-                $validationErrors[$error->getPropertyPath()] = $error->getMessage();
-            }
-
-            return $this->json([
-                'errors' => $validationErrors,
-            ], 400);
-        }
         $entityManager->persist($userRegisterForm);
         $entityManager->flush();
 
