@@ -39,8 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column(length: 5)]
+    #[ORM\Column(length: 500)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 5, max: 500)]
     private ?string $password = null;
 
     public function getId(): ?int
