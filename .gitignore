@@ -12,3 +12,4 @@ app/vendor/
 .mysql-data/
 app/composer.lock
 app/symfony.lock
+app/config/jwt/*.pem
