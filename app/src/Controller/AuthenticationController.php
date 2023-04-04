@@ -38,6 +38,11 @@ class AuthenticationController extends AbstractController
         if ($errors !== null)
             return $this->json($errors,400);
 
+        if ($entityManager->getRepository(User::class)->findOneBy(['email' => $userRegisterForm->getEmail()]))
+            return $this->json(["error" => "Email already exists"],400);
+
+        if ($entityManager->getRepository(User::class)->findOneBy(['login' => $userRegisterForm->getLogin()]))
+            return $this->json(["error" => "Login already exists"],400);
 
         $entityManager->persist($userRegisterForm);
         $entityManager->flush();
