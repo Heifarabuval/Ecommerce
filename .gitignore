@@ -13,3 +13,4 @@ app/vendor/
 app/composer.lock
 app/symfony.lock
 app/config/jwt/*.pem
+app/migrations
