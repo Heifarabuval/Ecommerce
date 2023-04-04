@@ -16,8 +16,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class AuthenticationController extends AbstractController
 {
 
-    #[Route('/register', name: 'app_register')]
-    public function index(Request $request, ValidatorInterface $validator,EntityManagerInterface $entityManager,UserPasswordHasherInterface $passwordHasher): JsonResponse
+    #[Route('/register', name: 'app_register',methods: ['POST'])]
+    public function register(Request $request, ValidatorInterface $validator, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $requestData = json_decode($request->getContent(), true);
 
