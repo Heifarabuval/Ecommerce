@@ -74,12 +74,40 @@ class ProductController extends AbstractController
         ]);
     }
 
-        #[Route('/products/{productId}', name: 'app_product_update',methods:['PATCH'])]
-    public function update(EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/products/{productId}', name: 'app_product_update', requirements: ['productId' => Requirement::DIGITS], methods: ['PATCH'])]
+    public function update(EntityManagerInterface $entityManager, $productId, Request $request,ValidatorInterface $validator): JsonResponse
     {
-       // dd($entityManager->getRepository(Product::class )->patchById());
+        $requestData = json_decode($request->getContent(), true);
+        $errors = Json::getJsonBody($request);
+
+        if ($errors !== null)
+            return $this->json($errors, 400);
+
+        if (!is_numeric($productId))
+            return $this->json([
+                'error' => 'Product id must be a number']);
+
+        $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $productId]);
+        if ($product === null)
+            return $this->json([
+                'error' => 'Product not found']);
+
+
+        $product->setName($requestData["name"] ?? $product->getName());
+        $product->setDescription($requestData["description"] ?? $product->getDescription());
+        $product->setPhoto($requestData["photo"] ?? $product->getPhoto());
+        $product->setPrice( $requestData["price"] ?? $product->getPrice());
+
+        //validate
+        $errors = Validate::validateEntity($product, $validator);
+        if ($errors !== null)
+            return $this->json($errors, 400);
+
+        $entityManager->flush();
+
+
         return $this->json([
-            'message' => 'Updated',
+            "product" => $product->getJson(),
         ]);
     }
 
