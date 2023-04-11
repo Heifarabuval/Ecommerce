@@ -17,6 +17,7 @@ class Product
 
     #[ORM\Column(length: 120)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 4,max: 20)]
     private ?string $name = null;
 
     #[ORM\Column(length: 150)]
