@@ -24,7 +24,7 @@ class UserController extends AbstractController
     }
 
 
-    #[Route('/users', name: 'app_user_update', methods: ['PUT'])]
+    #[Route('/users', name: 'app_user_update', methods: ['PATCH'])]
     public function index(EntityManagerInterface $entityManager,Request $request, ValidatorInterface $validator): JsonResponse
     {
         $user = $entityManager->getRepository(User::class)->find($this->getUser()->getId());
