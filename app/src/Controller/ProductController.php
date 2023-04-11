@@ -112,13 +112,22 @@ class ProductController extends AbstractController
     }
 
 
-    #[Route('/product', name: 'app_product_delete',methods:['DELETE'])]
-    public function delete(EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/products/{productId}', name: 'app_product_delete', requirements: ['productId' => Requirement::DIGITS], methods: ['DELETE'])]
+    public function delete(EntityManagerInterface $entityManager, $productId): JsonResponse
     {
-       // dd($entityManager->getRepository(Product::class )->delete());
-        return $this->json([
-            'message' => 'DELETE',
+        if (!is_numeric($productId))
+            return $this->json([
+                'error' => 'Product id must be a number']);
 
-        ]);
+
+        $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $productId]);
+        if ($product === null)
+                return $this->json([
+                    'error' => 'Product not found']);
+
+        $entityManager->remove($product);
+        $entityManager->flush();
+
+        return $this->json(['product' => $product->getJson()]);
     }
 }
