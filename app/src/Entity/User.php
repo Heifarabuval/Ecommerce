@@ -19,18 +19,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
+    #[Assert\Email]
     private ?string $email = null;
 
     #[ORM\Column(length: 20, unique: true)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 4, max: 20)]
     private ?string $login = null;
 
     #[ORM\Column(length: 40)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 4, max: 40)]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 40)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 4, max: 40)]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -42,6 +46,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 500)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 5, max: 500)]
+    #[Assert\NotCompromisedPassword]
     private ?string $password = null;
 
     public function getId(): ?int

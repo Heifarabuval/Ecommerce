@@ -31,7 +31,7 @@ class AuthenticationController extends AbstractController
         $userRegisterForm->setLogin($requestData['login'] ?? null);
         $userRegisterForm->setLastname($requestData['lastname'] ?? null);
         $userRegisterForm->setFirstname($requestData['firstname'] ?? null);
-        $userRegisterForm->setPassword(strlen($requestData['password']) > 0 ? $passwordHasher->hashPassword($userRegisterForm, $requestData['password']) : "");
+        $userRegisterForm->setPassword($requestData['password'] );
 
         $errors = Validate::validateEntity($userRegisterForm, $validator);
 
@@ -43,6 +43,8 @@ class AuthenticationController extends AbstractController
 
         if ($entityManager->getRepository(User::class)->findOneBy(['login' => $userRegisterForm->getLogin()]))
             return $this->json(["error" => "Login already exists"],400);
+
+        $userRegisterForm->setPassword($passwordHasher->hashPassword($userRegisterForm, $userRegisterForm->getPassword()));
 
         $entityManager->persist($userRegisterForm);
         $entityManager->flush();
