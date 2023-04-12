@@ -36,7 +36,14 @@ security:
     access_control:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/products, methods: [ POST, PATCH, DELETE ], roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/products,methods: [ GET ], roles: PUBLIC_ACCESS }
+        - { path: ^/api/products/[ 0-9 ]+$,methods: [ GET ], roles: PUBLIC_ACCESS }
+        - { path: ^/api/carts/[ 0-9 ]+$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/carts, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/carts/validate, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
