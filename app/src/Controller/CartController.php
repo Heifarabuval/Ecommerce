@@ -13,14 +13,14 @@ class CartController extends AbstractController
 {
 
 
-    function getObjById($array, $id)
-    {
-        foreach ($array as $obj) {
+    function deleteObjById(&$array, $id) {
+        foreach ($array as $key => $obj) {
             if ($obj['id'] == $id) {
-                return $obj;
+                unset($array[$key]);
+                return $array;
             }
         }
-        return null;
+        return false;
     }
 
 
@@ -61,21 +61,13 @@ class CartController extends AbstractController
 
         $cart = $session->get('cart') ?? [];
 
-        $_productId = $this->getObjById($cart, $productId);
+        $_productId = $this->deleteObjById($cart, $productId);
 
-        dd($productId);
-
-        if (count($_productId) === false)
+        if ($_productId === false)
             return $this->json([
                 'error' => 'Product not found in cart']);
 
         $session->set('cart', $cart);
-
-
-        $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $productId]);
-        if ($product === null)
-            return $this->json([
-                'error' => 'Product not found']);
 
         return $this->json([
             "cart" => $session->get("cart")
