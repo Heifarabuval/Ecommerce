@@ -68,6 +68,7 @@ class Order
             'id' => $this->getId(),
             'totalPrice' => $this->getTotalPrice(),
             'creationDate' => $this->getCreationDate(),
+            'products' => $this->getProducts()->map(fn(Product $product) => $product->getJson())->toArray()
         ];
     }
 
