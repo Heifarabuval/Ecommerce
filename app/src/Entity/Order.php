@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -22,7 +24,15 @@ class Order
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    private ?string $creationDate = null;
+    private ?\DateTime $creationDate = null;
+
+    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'orders',cascade: ["persist"])]
+    private Collection $products;
+
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -41,15 +51,14 @@ class Order
         return $this;
     }
 
-    public function getCreationDate(): ?string
+    public function getCreationDate(): \DateTime
     {
         return $this->creationDate;
     }
 
-    public function setCreationDate(string $creationDate): self
+    public function setCreationDate(): self
     {
-        $this->creationDate = $creationDate;
-
+        $this->creationDate = new \DateTime();
         return $this;
     }
 
@@ -61,4 +70,30 @@ class Order
             'creationDate' => $this->getCreationDate(),
         ];
     }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): self
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): self
+    {
+        $this->products->removeElement($product);
+
+        return $this;
+    }
+
+
 }

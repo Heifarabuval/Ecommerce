@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Order;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,7 +24,33 @@ class CartController extends AbstractController
         return false;
     }
 
+    #[Route('/carts/validate', name: 'app_cart_validate', methods: ['POST'])]
+    public function validateProduct(EntityManagerInterface $entityManager, Request $request): JsonResponse
+    {
+        $session = $request->getSession();
+        $cart = $session->get('cart') ?? [];
+        if (count($cart) === 0)
+            return $this->json([
+                'error' => 'Cart is empty']);
 
+        $sum = 0;
+
+        $order = new Order();
+        foreach ($cart as $product) {
+            $_product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $product['id']]);
+            $sum += $_product->getPrice();
+            $order->addProduct($_product);
+        }
+
+        $order->setTotalPrice($sum);
+        $order->setCreationDate();
+
+        $entityManager->persist($order);
+        $entityManager->flush();
+        return $this->json([
+            "cart" => $session->get("cart")
+        ]);
+    }
     #[Route('/carts/{productId}', name: 'app_cart_create', methods: ['POST'])]
     public function addProduct(EntityManagerInterface $entityManager, Request $request, $productId): JsonResponse
     {
@@ -78,31 +105,6 @@ class CartController extends AbstractController
     public function getProduct(Request $request): JsonResponse
     {
         $session = $request->getSession();
-
-        return $this->json([
-            "cart" => $session->get("cart")
-        ]);
-    }
-
-    #[Route('/carts/validate', name: 'app_cart', methods: ['POST'])]
-    public function validateProduct(EntityManagerInterface $entityManager, Request $request, $productId): JsonResponse
-    {
-
-        if (!is_numeric($productId))
-            return $this->json([
-                'error' => 'Product id must be a number']);
-
-        $product = $entityManager->getRepository(Product::class)->findById($productId);
-
-        if (count($product) === 0)
-            return $this->json([
-                'error' => 'Product not found']);
-
-        $session = $request->getSession();
-        $cart = $session->get('cart') ?? [];
-        $cart[] = $product;
-        $session->set('cart', $cart);
-
 
         return $this->json([
             "cart" => $session->get("cart")
