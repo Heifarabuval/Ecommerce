@@ -44,7 +44,7 @@ class OrderController extends AbstractController
                 'error' => 'Product not found']);
        
         return $this->json([
-           'product' => $order[0]->getJson()
+           'orders' => $order[0]->getJson()
         ]);
     }
 }
