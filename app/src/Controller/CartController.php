@@ -74,25 +74,10 @@ class CartController extends AbstractController
         ]);
     }
 
-    #[Route('/carts', name: 'app_cart', methods: ['GET'])]
-    public function getProduct(EntityManagerInterface $entityManager, Request $request, $productId): JsonResponse
+    #[Route('/carts', name: 'app_cart_get', methods: ['GET'])]
+    public function getProduct(Request $request): JsonResponse
     {
-
-        if (!is_numeric($productId))
-            return $this->json([
-                'error' => 'Product id must be a number']);
-
-        $product = $entityManager->getRepository(Product::class)->findById($productId);
-
-        if (count($product) === 0)
-            return $this->json([
-                'error' => 'Product not found']);
-
         $session = $request->getSession();
-        $cart = $session->get('cart') ?? [];
-        $cart[] = $product;
-        $session->set('cart', $cart);
-
 
         return $this->json([
             "cart" => $session->get("cart")
