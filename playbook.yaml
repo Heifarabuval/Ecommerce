@@ -163,7 +163,7 @@
       git:
         repo: "{{ git_repo }}"
         dest: "{{ server_root_dir }}"
-        version: main
+        version: deployment
       ignore_errors: true
       become: false
       remote_user: debian
@@ -177,7 +177,6 @@
       template:
         src: templates/.env
         dest: "{{ server_root_dir }}/app"
-
 
 
     - name: Install dependencies
