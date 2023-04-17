@@ -40,7 +40,7 @@ class CartController extends AbstractController
 
         $session = $request->getSession();
         $cart = $session->get('cart') ?? [];
-        $cart[] = $product;
+        $cart[] = $product[0]->getJson();
         $session->set('cart', $cart);
 
 
