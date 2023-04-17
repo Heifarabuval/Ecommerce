@@ -1,0 +1,8 @@
+[target_server]
+192.168.1.21
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=server
+ansible_ssh_pass=server
+ansible_sudo_pass=server
