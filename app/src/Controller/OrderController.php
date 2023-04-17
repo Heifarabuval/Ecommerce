@@ -26,7 +26,7 @@ class OrderController extends AbstractController
         $arrayorders = array_map(function ($order) {return $order->getJson();}, $order);
 
         return $this->json([
-            "message" => $arrayorders
+            "orders" => $arrayorders
         ]);
     }
 

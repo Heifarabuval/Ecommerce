@@ -29,12 +29,12 @@ class Order
         return $this->id;
     }
 
-    public function getTotalPrice(): ?string
+    public function getTotalPrice(): ?int
     {
         return $this->totalPrice;
     }
 
-    public function setTotalPrice(string $totalPrice): self
+    public function setTotalPrice(int $totalPrice): self
     {
         $this->totalPrice = $totalPrice;
 
