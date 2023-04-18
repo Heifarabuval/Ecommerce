@@ -32,13 +32,13 @@ class ProductController extends AbstractController
     {
         if (!is_numeric($productId))
             return $this->json([
-                'error' => 'Product id must be a number']);
+                'error' => 'Product id must be a number'],400);
 
        $product = $entityManager->getRepository(Product::class )->findById($productId);
 
          if(count($product)===0)
             return $this->json([
-                'error' => 'Product not found']);
+                'error' => 'Product not found'],404);
 
         return $this->json([
             'product' => $product[0]->getJson()
@@ -71,7 +71,7 @@ class ProductController extends AbstractController
 
         return $this->json([
             "product"=>$product->getJson()
-        ]);
+        ],201);
     }
 
     #[Route('/products/{productId}', name: 'app_product_update', requirements: ['productId' => Requirement::DIGITS], methods: ['PATCH'])]
@@ -85,12 +85,12 @@ class ProductController extends AbstractController
 
         if (!is_numeric($productId))
             return $this->json([
-                'error' => 'Product id must be a number']);
+                'error' => 'Product id must be a number'],400);
 
         $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $productId]);
         if ($product === null)
             return $this->json([
-                'error' => 'Product not found']);
+                'error' => 'Product not found'],404);
 
 
         $product->setName($requestData["name"] ?? $product->getName());
@@ -117,13 +117,13 @@ class ProductController extends AbstractController
     {
         if (!is_numeric($productId))
             return $this->json([
-                'error' => 'Product id must be a number']);
+                'error' => 'Product id must be a number'],400);
 
 
         $product = $entityManager->getRepository(Product::class)->findOneBy(['id' => $productId]);
         if ($product === null)
                 return $this->json([
-                    'error' => 'Product not found']);
+                    'error' => 'Product not found'],404);
 
         $entityManager->remove($product);
         $entityManager->flush();

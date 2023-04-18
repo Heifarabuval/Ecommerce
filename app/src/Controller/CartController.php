@@ -31,7 +31,7 @@ class CartController extends AbstractController
         $cart = $session->get('cart') ?? [];
         if (count($cart) === 0)
             return $this->json([
-                'error' => 'Cart is empty']);
+                'error' => 'Cart is empty'],404);
 
         $sum = 0;
 
@@ -49,7 +49,7 @@ class CartController extends AbstractController
         $entityManager->flush();
         return $this->json([
             "cart" => $session->get("cart")
-        ]);
+        ],201);
     }
     #[Route('/carts/{productId}', name: 'app_cart_create', methods: ['POST'])]
     public function addProduct(EntityManagerInterface $entityManager, Request $request, $productId): JsonResponse
@@ -57,13 +57,13 @@ class CartController extends AbstractController
 
         if (!is_numeric($productId))
             return $this->json([
-                'error' => 'Product id must be a number']);
+                'error' => 'Product id must be a number'],400);
 
         $product = $entityManager->getRepository(Product::class)->findById($productId);
 
         if (count($product) === 0)
             return $this->json([
-                'error' => 'Product not found']);
+                'error' => 'Product not found'],404);
 
         $session = $request->getSession();
         $cart = $session->get('cart') ?? [];
@@ -73,7 +73,7 @@ class CartController extends AbstractController
 
         return $this->json([
             "cart" => $session->get("cart")
-        ]);
+        ],201);
     }
 
     #[Route('/carts/{productId}', name: 'app_cart_delete', methods: ['DELETE'])]
@@ -82,7 +82,7 @@ class CartController extends AbstractController
 
         if (!is_numeric($productId))
             return $this->json([
-                'error' => 'Product id must be a number']);
+                'error' => 'Product id must be a number'],400);
 
         $session = $request->getSession();
 
@@ -92,7 +92,7 @@ class CartController extends AbstractController
 
         if ($_productId === false)
             return $this->json([
-                'error' => 'Product not found in cart']);
+                'error' => 'Product not found in cart'],400);
 
         $session->set('cart', $cart);
 

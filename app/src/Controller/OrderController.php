@@ -35,13 +35,13 @@ class OrderController extends AbstractController
     {
         if (!is_numeric($orderId))
             return $this->json([    
-                'error' => 'Product id must be a number']);
+                'error' => 'Product id must be a number'],400);
 
         $order = $entityManager->getRepository(Order::class )->findById($orderId);
 
         if(count($order)===0)
             return $this->json([
-                'error' => 'Product not found']);
+                'error' => 'Product not found'],404);
        
         return $this->json([
            'orders' => $order[0]->getJson()

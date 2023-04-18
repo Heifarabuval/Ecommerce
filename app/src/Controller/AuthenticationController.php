@@ -51,6 +51,6 @@ class AuthenticationController extends AbstractController
 
         return $this->json([
             "user"=> $userRegisterForm->getJson(),
-        ]);
+        ],201);
     }
 }
