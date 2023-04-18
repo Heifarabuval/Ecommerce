@@ -1,0 +1,205 @@
+---
+- hosts: all
+  become: true
+  remote_user: server
+  vars:
+    mysql_root_password: root
+    server_name: ecommerce.fr
+    server_root_dir: /home/server/apps
+    server_web_dir: "{{ server_root_dir }}/app/public"
+    git_repo: https://github.com/Heifarabuval/Ecommerce.git
+  tasks:
+    - ping: ~
+
+    - name: Assert os is Debian 11
+      meta: end_play
+      when: ansible_distribution != "Debian" or ansible_distribution_major_version != "11"
+
+    - name: Update repositories cache and upgrade
+      apt:
+        update_cache: yes
+
+    - name: Upgrade apt
+      apt:
+        upgrade: safe
+
+    - name: install apt utils
+      apt:
+        name: software-properties-common
+        update_cache: yes
+
+    - name: Install php libraries
+      apt:
+        name:
+          - ca-certificates
+          - apt-transport-https
+          - software-properties-common
+          - wget
+          - curl
+          - lsb-release
+          - git
+          - unzip
+          - zip
+          - python3
+          - python3-pip
+          - python3-pymysql
+        state: latest
+        update_cache: yes
+
+    - name: Install MariaDB
+      apt:
+        name: mariadb-server
+        state: latest
+
+    - name: Start MariaDB service
+      service:
+        name: mariadb
+        enabled: true
+        state: started
+
+    - name: Create MariaDB user
+      mysql_user:
+        check_implicit_admin: true
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: symfony
+        password: "{{ mysql_root_password }}"
+        priv: "*.*:ALL"
+        state: present
+
+    - name: Create MariaDB database
+      mysql_db:
+        login_user: symfony
+        login_password: "{{ mysql_root_password }}"
+        name: eshop
+        state: present
+
+
+    - name: Get php latest
+      shell: curl -sSL https://packages.sury.org/php/README.txt | bash -x
+
+
+    - name: Updating the repo
+      apt:
+        update_cache: true
+
+
+    - name: Install php latest
+      apt:
+        name: php8.1
+        state: latest
+        update_cache: yes
+
+    - name: apt update
+      apt:
+        update_cache: yes
+
+    - name: Install PHP dependencies
+      apt:
+        pkg:
+          - php8.2-mysql
+          - php8.2-curl
+          - php8.2-common
+          - php8.2-cgi
+          - php8.2-xsl
+          - php8.2-cgi
+          - php8.2-gd
+          - php8.2-mbstring
+          - php8.2-zip
+          - php8.2-xmlrpc
+          - php8.2-soap
+          - php8.2-intl
+          - php8.2-fpm
+          - libapache2-mod-php
+        state: present
+        update_cache: yes
+
+
+    - name: Install Composer
+      become: true
+      shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+    - name: Remove apache2
+      apt:
+        name: apache2
+        state: absent
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: restarted
+
+    - name: Add Symfony config template
+      template:
+        src: templates/nginx.conf
+        dest: "/etc/nginx/sites-available/{{ server_name }}.conf"
+
+    - name: Enable Symfony config
+      file:
+        src: "/etc/nginx/sites-available/{{ server_name }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ server_name }}.conf"
+        state: link
+
+    - name: Edit /etc/hosts config
+      lineinfile:
+        dest: /etc/hosts
+        regexp: "{{ server_name }}"
+        line: "127.0.0.1 {{ server_name }}"
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+    - name: create /home/server/apps directory
+      file:
+        path: /home/server/apps
+        state: directory
+        owner: server
+        mode: 0755
+
+    - name : add secure repo
+      shell: "git config --global --add safe.directory /home/server/apps"
+
+    - name: Git clone
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ server_root_dir }}"
+        version: main
+      ignore_errors: true
+      become: false
+      remote_user: server
+
+    - name: Git pull
+      shell: "cd {{ server_root_dir }} ; git pull origin main"
+      become: false
+      remote_user: server
+
+    - name: Add .env to app
+      template:
+        src: templates/.env
+        dest: "{{ server_root_dir }}/app"
+
+
+    - name: Install dependencies
+      shell: "cd {{ server_root_dir }}/app ; composer install"
+      environment:
+        COMPOSER_NO_INTERACTION: "1"
+        COMPOSER_ALLOW_SUPERUSER: "1"
+
+    - name: make migrations
+      shell: "cd {{ server_root_dir }}/app ; php bin/console make:migration"
+      become: false
+
+    - name: migrate no interaction
+      shell: "cd {{ server_root_dir }}/app ; php bin/console doctrine:migrations:migrate --no-interaction"
+      become: false
+
+    - name: generate key pair jwt
+      shell: "cd {{ server_root_dir }}/app ; php bin/console lexik:jwt:generate-keypair --overwrite --no-interaction"
+      become: false
