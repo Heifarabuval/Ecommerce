@@ -20,12 +20,12 @@ class Product
     #[Assert\Length(min: 4,max: 20)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 150)]
+    #[ORM\Column(length: 550)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2,max: 500)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 200)]
+    #[ORM\Column(length: 400)]
     #[Assert\NotBlank]
     #[Assert\Url]
     private ?string $photo = null;
